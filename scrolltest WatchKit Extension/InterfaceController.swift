@@ -35,7 +35,7 @@ class InterfaceController: WKInterfaceController, WKCrownDelegate {
 				cameraNode.position = node.position
 				if let shape = node as? SKSpriteNode{
 					imageNode = shape
-					let image = UIImage(named: "img")!
+					let image = UIImage(named: "comic")!
 					let tex = SKTexture(image: image)
 					imageNode.run(SKAction.setTexture(tex))
 					
@@ -81,15 +81,25 @@ class InterfaceController: WKInterfaceController, WKCrownDelegate {
 			translation.x = translation.x * cameraNode.xScale
 			translation.y = translation.y * cameraNode.yScale
 			
-			print((imageNode.position - (WKInterfaceDevice.current().screenBounds.width)) - cameraNode.position)
-			if cameraNode.position.x >= (imageNode.frame.minX){
+			print((cameraNode.frame.minY - imageNode.frame.minY) - (imageNode.frame.width / 2) * zoomLevel)
+			
+			if ((cameraNode.frame.minX - imageNode.frame.minX) - (imageNode.frame.width / 2) * zoomLevel) > 0{
 				cameraNode.position.x -= translation.x - self.previous.x
-			} else {
-				
+			} else{
+				cameraNode.position.x = imageNode.frame.minX + (imageNode.frame.width / 2) * zoomLevel //Stick to left
 			}
-			if cameraNode.position.y >= (imageNode.frame.minY){
+			
+			
+			if (cameraNode.frame.minY - imageNode.frame.minY) - (imageNode.frame.width / 2) * zoomLevel > 0{
 				cameraNode.position.y -= translation.y - self.previous.y
+			} else{
+				cameraNode.position.y = imageNode.frame.minY + (imageNode.frame.width / 2) * zoomLevel
 			}
+			if (cameraNode.frame.minY - imageNode.frame.minY) - (imageNode.frame.width / 2) * zoomLevel < 1{
+				print("Equal")
+				cameraNode.position.y = imageNode.frame.minY + (imageNode.frame.width / 2) * zoomLevel + 0.1
+			}
+			
 			
 			self.previous = translation
 		}
@@ -97,6 +107,9 @@ class InterfaceController: WKInterfaceController, WKCrownDelegate {
 	}
 	func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
 		print(zoomLevel)
+		if zoomLevel > 1{
+			zoomLevel = 1
+		}
 		if rotationalDelta < 0 && zoomLevel <= 1{ //Zoom out
 			zoomLevel += 0.01 * zoomLevel
 			let zoomInAction = SKAction.scale(to: zoomLevel, duration: 0)
