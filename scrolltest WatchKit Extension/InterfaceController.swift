@@ -15,6 +15,8 @@ class InterfaceController: WKInterfaceController, WKCrownDelegate {
 
 	var zoomLevel: CGFloat = 1
 	
+	var previous = CGPoint()
+	
 	@IBOutlet var skInterface: WKInterfaceSKScene!
 	let cameraNode = SKCameraNode()
 	override func awake(withContext context: Any?) {
@@ -49,21 +51,23 @@ class InterfaceController: WKInterfaceController, WKCrownDelegate {
 	
 	
 	@IBAction func didPan(_ sender: WKPanGestureRecognizer) {
-		print("\n\n")
-		print(sender.translationInObject())
-		print(cameraNode.position)
-		print(cameraNode.position + sender.translationInObject())
+		
+		
 		var translation = sender.translationInObject()
 		
 		translation.x *= -1 //Panning to the right would make it go left, need to * -1
 		translation.x = translation.x * cameraNode.xScale
-	
 		translation.y = translation.y * cameraNode.yScale
+		print(previous)
+		print(translation)
 		
-		let movement = SKAction.move(to: translation, duration: 0)
+		print(translation.x - self.previous.x)
 		
 		
-		cameraNode.run(movement)
+		let mov = SKAction.moveBy(x: translation.x - self.previous.x, y: translation.y - self.previous.y, duration: 0)
+		cameraNode.run(mov)
+		self.previous = translation
+		
 	}
 	func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
 		print(zoomLevel)
@@ -87,6 +91,18 @@ extension CGPoint{
 		var copy = left
 		copy.x += right.x
 		copy.y += right.y
+		return copy
+	}
+	static func -=(left: CGPoint, right: CGPoint) -> CGPoint{
+		var copy = left
+		copy.x -= right.x
+		copy.y -= right.y
+		return copy
+	}
+	static func -(left: CGPoint, right: CGPoint) -> CGPoint{
+		var copy = left
+		copy.x -= right.x
+		copy.y -= right.y
 		return copy
 	}
 	static func +(left: CGPoint, right: CGPoint) -> CGPoint{
